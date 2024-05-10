@@ -2,8 +2,9 @@ package service
 
 import (
 	"errors"
+	"fmt"
 
-    "github.com/go-admin-team/go-admin-core/sdk/service"
+	"github.com/go-admin-team/go-admin-core/sdk/service"
 	"gorm.io/gorm"
 
 	"go-admin/app/admin/models"
@@ -58,36 +59,37 @@ func (e *Customer) Get(d *dto.CustomerGetReq, p *actions.DataPermission, model *
 }
 
 // Insert 创建Customer对象
-func (e *Customer) Insert(c *dto.CustomerInsertReq) error {
-    var err error
-    var data models.Customer
-    c.Generate(&data)
+func (e *Customer) Insert(c *dto.CustomerInsertReq) (int, error) {
+	var err error
+	var data models.Customer
+	c.Generate(&data)
 	err = e.Orm.Create(&data).Error
 	if err != nil {
 		e.Log.Errorf("CustomerService Insert error:%s \r\n", err)
-		return err
+		return -1, err
 	}
-	return nil
+	fmt.Print(data)
+	return data.Model.Id, nil
 }
 
 // Update 修改Customer对象
 func (e *Customer) Update(c *dto.CustomerUpdateReq, p *actions.DataPermission) error {
-    var err error
-    var data = models.Customer{}
-    e.Orm.Scopes(
-            actions.Permission(data.TableName(), p),
-        ).First(&data, c.GetId())
-    c.Generate(&data)
+	var err error
+	var data = models.Customer{}
+	e.Orm.Scopes(
+		actions.Permission(data.TableName(), p),
+	).First(&data, c.GetId())
+	c.Generate(&data)
 
-    db := e.Orm.Save(&data)
-    if err = db.Error; err != nil {
-        e.Log.Errorf("CustomerService Save error:%s \r\n", err)
-        return err
-    }
-    if db.RowsAffected == 0 {
-        return errors.New("无权更新该数据")
-    }
-    return nil
+	db := e.Orm.Save(&data)
+	if err = db.Error; err != nil {
+		e.Log.Errorf("CustomerService Save error:%s \r\n", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		return errors.New("无权更新该数据")
+	}
+	return nil
 }
 
 // Remove 删除Customer
@@ -99,11 +101,11 @@ func (e *Customer) Remove(d *dto.CustomerDeleteReq, p *actions.DataPermission) e
 			actions.Permission(data.TableName(), p),
 		).Delete(&data, d.GetId())
 	if err := db.Error; err != nil {
-        e.Log.Errorf("Service RemoveCustomer error:%s \r\n", err)
-        return err
-    }
-    if db.RowsAffected == 0 {
-        return errors.New("无权删除该数据")
-    }
+		e.Log.Errorf("Service RemoveCustomer error:%s \r\n", err)
+		return err
+	}
+	if db.RowsAffected == 0 {
+		return errors.New("无权删除该数据")
+	}
 	return nil
 }

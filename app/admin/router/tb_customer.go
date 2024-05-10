@@ -22,7 +22,7 @@ func registerCustomerRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 		r.GET("", actions.PermissionAction(), api.GetPage)
 		r.GET("/:id", actions.PermissionAction(), api.Get)
 		//r.POST("", api.Insert)
-		r.PUT("/:id", actions.PermissionAction(), api.Update)
+		//r.PUT("/:id", actions.PermissionAction(), api.Update)
 		r.DELETE("", api.Delete)
 	}
 }
@@ -32,6 +32,7 @@ func registerCustomerRouterNoCheck(v1 *gin.RouterGroup) {
 	api := apis.Customer{}
 	r := v1.Group("/customer")
 	{
+		r.PUT("/:id", api.Update)
 		r.POST("", api.Insert)
 	}
 }
